@@ -1,0 +1,16 @@
+{
+  "meetingID": "mtg-2026-10-13-budget",
+  "title": "Budget review without a decision",
+  "transcriptSegments": [
+    {
+      "speaker": "Ana",
+      "start": "00:00:03",
+      "text": "We still have not decided on the tooling budget."
+    },
+    {
+      "speaker": "Bruno",
+      "start": "00:00:09",
+      "text": "Let us revisit it next week with numbers."
+    }
+  ]
+}

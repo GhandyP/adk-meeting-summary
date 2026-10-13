@@ -1,0 +1,51 @@
+{
+  "meetingID": "mtg-2026-10-13-sprint-review",
+  "decisions": [
+    {
+      "text": "Ship the importer on Friday.",
+      "evidenceIDs": ["e1"]
+    }
+  ],
+  "actions": [
+    {
+      "text": "Write the migration guide.",
+      "owner": "Bruno",
+      "dueDate": "unknown",
+      "evidenceIDs": ["e2"]
+    },
+    {
+      "text": "Find an owner for the pricing page.",
+      "owner": "unknown",
+      "dueDate": "unknown",
+      "evidenceIDs": ["e3"]
+    }
+  ],
+  "openQuestions": [
+    {
+      "text": "Who owns the pricing page?",
+      "evidenceIDs": ["e3"]
+    }
+  ],
+  "participants": [
+    { "name": "Ana" },
+    { "name": "Bruno" },
+    { "name": "unknown", "unknown": true }
+  ],
+  "evidence": [
+    {
+      "id": "e1",
+      "segmentIndex": 0,
+      "quote": "We ship the importer on Friday."
+    },
+    {
+      "id": "e2",
+      "segmentIndex": 1,
+      "quote": "I will write the migration guide."
+    },
+    {
+      "id": "e3",
+      "segmentIndex": 2,
+      "quote": "The pricing page still has no owner."
+    }
+  ]
+}

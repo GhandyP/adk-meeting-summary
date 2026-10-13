@@ -1,0 +1,30 @@
+{
+  "meetingID": "mtg-2026-10-13-sprint-review",
+  "title": "Sprint review",
+  "transcriptSegments": [
+    {
+      "speaker": "Ana",
+      "start": "00:00:05",
+      "end": "00:00:09",
+      "text": "We ship the importer on Friday."
+    },
+    {
+      "speaker": "Bruno",
+      "start": "00:00:12",
+      "end": "00:00:16",
+      "text": "I will write the migration guide."
+    },
+    {
+      "speaker": "Ana",
+      "start": "00:00:20",
+      "end": "00:00:24",
+      "text": "The pricing page still has no owner."
+    },
+    {
+      "speaker": "",
+      "start": "00:00:31",
+      "end": "00:00:35",
+      "text": "Attendance list is not finalised."
+    }
+  ]
+}

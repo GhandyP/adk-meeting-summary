@@ -1,0 +1,25 @@
+{
+  "meetingID": "mtg-2026-10-13-standup",
+  "title": "Standup with overlapping speakers",
+  "transcriptSegments": [
+    {
+      "speaker": "Ana",
+      "start": "00:01:00",
+      "end": "00:01:30",
+      "text": "The deploy window moves to Thursday."
+    },
+    {
+      "speaker": "Bruno",
+      "start": "00:01:10",
+      "end": "00:01:40",
+      "text": "I can prepare the rollback plan."
+    },
+    {
+      "speaker": "Ana",
+      "text": "Nobody volunteered for the customer note."
+    },
+    {
+      "text": "Second recorder picked up an unidentified voice."
+    }
+  ]
+}

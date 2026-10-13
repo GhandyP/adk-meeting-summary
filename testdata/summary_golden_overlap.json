@@ -1,0 +1,56 @@
+{
+  "meetingID": "mtg-2026-10-13-standup",
+  "decisions": [
+    {
+      "text": "The deploy window moves to Thursday.",
+      "evidenceIDs": ["e1"]
+    }
+  ],
+  "actions": [
+    {
+      "text": "Prepare the rollback plan.",
+      "owner": "Bruno",
+      "dueDate": "2026-10-15",
+      "evidenceIDs": ["e2"]
+    },
+    {
+      "text": "Volunteer for the customer note.",
+      "owner": "unknown",
+      "dueDate": "unknown",
+      "evidenceIDs": ["e3"]
+    }
+  ],
+  "openQuestions": [
+    {
+      "text": "Who writes the customer note?",
+      "evidenceIDs": ["e3"]
+    }
+  ],
+  "participants": [
+    { "name": "Ana" },
+    { "name": "Bruno" },
+    { "name": "unknown", "unknown": true }
+  ],
+  "evidence": [
+    {
+      "id": "e1",
+      "segmentIndex": 0,
+      "quote": "The deploy window moves to Thursday."
+    },
+    {
+      "id": "e2",
+      "segmentIndex": 1,
+      "quote": "I can prepare the rollback plan."
+    },
+    {
+      "id": "e3",
+      "segmentIndex": 2,
+      "quote": "Nobody volunteered for the customer note."
+    },
+    {
+      "id": "e4",
+      "segmentIndex": 3,
+      "quote": "unidentified voice"
+    }
+  ]
+}
