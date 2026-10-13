@@ -1,68 +1,128 @@
-# 04 — Transcribe and summarize meetings
+# adk-meeting-summary
 
-## Goal
+Turn a supplied **text** meeting transcript into a validated, evidence-bearing summary using one
+[Google ADK](https://google.github.io/adk-docs/) (Go, v2) agent.
 
-Summarize a supplied meeting transcript into decisions, actions, and open questions, while making clear that audio transcription is a future boundary.
+The summary comes back as validated arrays: decisions, actions, open questions, participants and
+evidence. An action whose owner or due date the transcript never stated is marked `unknown` and
+reported for human confirmation instead of being guessed. Audio transcription, task creation and
+calendar writes are deliberately out of scope.
 
-## Run the current prototype
+## Requirements
 
-From this case directory:
+- Go 1.26.6 or newer
+- A Gemini API key in `GOOGLE_API_KEY`, only for an actual model run
+
+## Quick start
 
 ```bash
+git clone https://github.com/GhandyP/adk-meeting-summary
+cd adk-meeting-summary
+
+# No credential needed: validate the transcript and print the payload that would be sent.
+go run . -dry-run -in testdata/transcript_overlap.json
+
+# A real run: prints the summary JSON on stdout and the human checks on stderr.
 export GOOGLE_API_KEY="your-key"
-go run .
+go run . -in testdata/transcript_ok.json
 ```
 
-`internal/adkhelper.Run` uses ADK Go v2.2.0, Gemini, and `gemini-flash-latest`; set `ADK_MODEL` to override the model.
-
-Sample prompt:
+## Usage
 
 ```text
-Summarize these meeting notes, including decisions and owners.
+adk-meeting-summary [flags]
+
+  -in string     transcript JSON file to read, or "-" for stdin (default "-")
+  -out string    file for the summary JSON, or "-" for stdout (default "-")
+  -model string  Gemini model name (default: ADK_MODEL, then gemini-flash-latest)
+  -dry-run       validate the transcript and print the model payload without calling a model
+  -pretty        indent the summary JSON (default true)
 ```
 
-## What exists now
+Exit codes: `0` success or help, `1` transcript/model/validation failure, `2` wrong command line.
 
-- `main.go (exists)` runs one focused Gemini ADK agent over text supplied in the prompt.
-- The output is untyped text; speaker, timestamp, decision, owner, and due-date fields are not validated.
-- This is intentionally text-only: it does not accept audio, call recordings, Whisper output, calendar events, or task writes.
+## Transcript contract
 
-## Missing elements
+```json
+{
+  "meetingID": "mtg-2026-10-13-sprint-review",
+  "title": "Sprint review",
+  "transcriptSegments": [
+    { "speaker": "Ana", "start": "00:00:05", "end": "00:00:09", "text": "We ship the importer on Friday." }
+  ]
+}
+```
 
-- **Contract:** Define `MeetingInput{meetingID, transcriptSegments[]}` -> `MeetingSummary{decisions[], actions[], openQuestions[], participants[], evidence[]}`.
-- **ADK workflow:** Add a transcript-normalizer agent, a summary agent, schemas, and a meeting session; a future `create_task` tool must remain disabled during drafting.
-- **Domain boundary:** Add a Whisper/STT adapter, speaker/timestamp mapper, and optional calendar/task adapters outside the summarizer.
-- **Fixtures and validation:** Cover overlapping speakers, missing timestamps, undecided items, and empty transcripts with golden summaries and owner/date checks.
-- **Safety:** Require a human to confirm inferred owners and deadlines before publishing minutes or creating tasks.
+`speaker`, `start` and `end` may be absent: a missing speaker is labelled `unknown` and a missing
+timestamp stays empty, so the payload never implies a time or a person the transcript did not state.
+Overlapping speakers are legitimate and keep their transcript order.
 
-## Target structure
+## Summary contract
+
+```json
+{
+  "meetingID": "mtg-2026-10-13-sprint-review",
+  "decisions": [{ "text": "Ship the importer on Friday.", "evidenceIDs": ["e1"] }],
+  "actions": [
+    { "text": "Write the migration guide.", "owner": "Bruno", "dueDate": "2026-10-20", "evidenceIDs": ["e2"] }
+  ],
+  "openQuestions": [{ "text": "Who owns the pricing page?", "evidenceIDs": ["e3"] }],
+  "participants": [{ "name": "Ana" }, { "name": "Bruno" }],
+  "evidence": [{ "id": "e1", "segmentIndex": 0, "quote": "We ship the importer on Friday." }]
+}
+```
+
+## What is validated
+
+Every model answer is checked against the transcript it claims to describe. A summary is rejected,
+never silently repaired, when:
+
+- the meeting id does not match the transcript;
+- a decision, action or open question has no text or no evidence id;
+- an evidence id is undefined, empty or duplicated;
+- an evidence `segmentIndex` falls outside the transcript;
+- an evidence quote is empty;
+- a participant never appears in the transcript.
+
+On top of the hard rules:
+
+- every slice is rendered as an array, never `null`;
+- a blank owner or due date becomes `unknown`;
+- quotes that do not appear in the segment they cite are reported as warnings;
+- actions whose owner or due date is `unknown` are listed on stderr for human confirmation before
+  any minutes are published or any task is created.
+
+## Layout
 
 ```text
-04-meeting-transcription-summary/
-├── main.go (exists)
-├── README.md (exists)
-├── workflow.go (next)
-├── schema.go (next)
-├── adapters/stt.go (next)
-├── testdata/transcript.json (next)
-└── main_test.go (next)
+main.go                      CLI: file or stdin in, summary JSON out
+internal/meeting             the contract and its validation rules
+internal/transcript          transcript loading, validation and prompt rendering
+internal/summary             the ADK agent, its instruction, schema and parser
+testdata/                    transcripts and golden summaries for the edge cases
+odd/tasks/                   the ODD task document this version was built from
 ```
 
-## Implementation order
+## Tests
 
-1. Define timestamped transcript segments and the typed summary contract.
-2. Normalize speakers and add summary schemas before connecting audio.
-3. Add the STT adapter and a session keyed by meeting ID.
-4. Test decisions, unknown owners, overlaps, and missing timestamps.
-5. Add approval-gated calendar/task tools for confirmed actions only.
+```bash
+go test ./... -count=1
+```
 
-## Done when
+Everything except one test runs offline with no credentials: the contract, the validation rules, the
+transcript fixtures, the golden summaries, the agent instruction and output schema, the model answer
+parser, and the CLI. `TestSummarizeLive` performs the real ADK round trip and is skipped unless
+`GOOGLE_API_KEY` is set.
 
-- [ ] Decisions, actions, questions, and evidence are returned as validated arrays.
-- [ ] Unknown owners/dates are marked unknown and never inferred as facts.
-- [ ] Transcript fixtures and tests cover speaker and timestamp edge cases.
-- [ ] Audio ingestion and task/calendar writes are separate, reviewed, and approval-gated.
+The fixtures cover the cases that break naive summarizers: overlapping speakers, missing timestamps,
+a missing speaker, a meeting that decided nothing, an empty transcript, and actions with no owner.
 
-## Next improvement
+## Boundaries
 
-Make the current transcript path typed and evidence-bearing before adding Whisper or calendar integration.
+- Text only. No audio, no speech to text, no diarization.
+- No tools are bound to the agent: drafting minutes cannot create tasks, write calendars or publish.
+- No task or calendar adapter. Those belong outside the summarizer and stay approval-gated.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
