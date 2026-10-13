@@ -1,0 +1,30 @@
+# Compiled binaries
+/adk-meeting-summary
+*.exe
+*.test
+*.out
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Meeting material stays private: never commit transcripts or audio
+/testdata/private/
+*.mp3
+*.wav
+*.m4a
+*.mp4
+*.vtt
+*.srt
+
+# Go tooling
+/go.work
+/go.work.sum
+/.gomodcache/
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
